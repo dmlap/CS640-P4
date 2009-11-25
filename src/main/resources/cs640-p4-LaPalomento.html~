@@ -1,0 +1,208 @@
+<!doctype html>
+<html>
+  <head>
+    <title>CS440/CS640 - Project 4</title>
+    <style>
+      .authors {
+        text-align: center;
+      }
+      .authors li {
+        list-style-type: none;
+      }
+      h1,h2 {
+        text-align: center;
+      }
+    .abhinay-player {
+	font-size: 12px;
+}
+    .MYTABLE tbody .MYTABLE .MYTABLE {
+}
+</style>
+  </head>
+<body>
+<h1>CS440/CS640 - Project 4</h1>
+    <ul class="authors">
+      <li>Justin Davis</li>
+      <li>Abhinay Evani  </li>
+      <li>David LaPalomento</li>
+      <li>Howell Martinez</li>
+    </ul>
+    <hr />
+<h2>Goals</h2>
+    <p>
+      The Atropos Game is a two-player game created at Boston University.  It is played on a (roughly) triangular board formed out of circles which may be uncolored, red or blue.  On each player's turn, they must color one uncolored circle, adjacent to the circle most recently colored by their opponent if possible.  One player is declared the winner when their opponent is forced to color a circle such that a triangle of all three colors is formed.
+    </p>
+    <p>
+      In this project, our group developed a search algorithm to traverse the space of possible moves in order to play Atropos intelligently.  To that end, we implemented an <a href="http://en.wikipedia.org/wiki/Alpha-beta_pruning">alpha-beta pruning</a> search and a number of static evaluation functions.  Alpha-beta search is a variant of <a href="http://en.wikipedia.org/wiki/Minimax">minimax search</a> which seeks to prune branches of the search space aggressively.
+    </p>
+    <h2>Rules of the Atropos Game</h2>
+<p>The rules of the game are as follows:</p>
+    <ol>
+      <li>Atropos is a two-player game played on a triangle-shaped board. It is convenient to visualize each position on this board as a circle rather than a square.</li>
+      <li>There is no "regulation" size for the board. You and your opponent agree on the board size for each game. Atropos gets interesting when the board size is at least 6.</li>
+      <li>The boundaries of the board are pre-colored before the game starts. The "bottom" side of the triangle is always colored with the red-blue pattern. The left side is always colored with the red-green pattern, and the right side with the green-blue pattern.</li>
+      <li>Each move (play) consists of filling an uncolored position (circle) on the board with one of the three colors (red, green, or blue).</li>
+      <li>Restrictions on the placement of the next move are as follows. The very first move may be anywhere on the board. For all subsequent moves, if the previous move (play) was adjacent to some uncolored circles, the current move must select one of these uncolored circles. Otherwise, if there are no adjacent uncolored circles, the current player may play anywhere on the board.</li>
+      <li>The game is over when a player (call her player A) colors a circle in such a way that it completes a three-colored triangle (i.e., a configuration of red, green, and blue circles all adjacent to each other). When this happens, player A loses the game and player B wins. Note that player A can lose either due to carelessness or because player B forces player A to make the losing move (see rule 5).</li>
+    </ol>
+    <h2>Project Structure</h2>
+    <dl>
+      <dt><a href="src/main/java/edu/bu/Player.java">Player.java</a>:</dt>
+      <dd>
+	<p>
+	  The internal, driver object for evaluating the current game state and selecting a move.  This object implements the alpha-beta pruning minimax search algorithm as well.
+	</p>
+	<p>
+Minimax is a decision rule used in decision theory, game theory, statistics and philosophy for minimizing the maximum possible loss.  It involves traversing a game tree up to a specified depth, and evaluating the payoff of each leaf node. The highest value is then recursively pushed up the game tree to the root node, telling you the payoff of the corresponding move given both players try their best to win.
+	</p>
+	<p>
+	  To minimize the visited nodes and thereby cut calculation time, alpha-beta pruning can be applied. Alpha-beta pruning is a search algorithm which seeks to reduce the number of nodes that are evaluated in the search tree by the minimax algorithm. It keeps track of the highest payoff a certain branch gives and stops evaluating another branch of the same level when at least one move within that branch gives a lower payoff than the stored value. This way, not all nodes and subbranches are evaluated unless the best moves reside on the nodes that are evaluated last.
+	</p>
+      </dd>
+      <dt><a href="src/main/java/edu/bu/DeepPlayer.java">DeepPlayer.java</a>:</dt>
+      <dd>
+	<p>
+	  A ScriptPlayer that employs a defensive Atropos strategy with a seven-move lookahead.  This player employs three evaluation techniques to get into positions that are safer and more open.  The evaluator first counts the number of open spaces and adds value for each uncolored circle.  This places a priority on children that will put the player in a more open area away from possible losing situations.  The second evalutation is of the colored neighbors in the area.  The value is decremented for every neighbor that is a different color.  This tries to prevent the situation where the player is surrounded by multiple different colors which could cause a losing condition.  The final evaluation is of neighbors that are of the same color.  Value is added anytime a neighbor is found that matches the color of the current move.  This move is favored as it pushes the player towards areas with the same color to prevent a losing condition.  All these evaluations create a player that will avoid small areas of varying colors.
+	</p>
+      </dd>
+      <dt><a href="src/main/java/edu/bu/SimplePlayer.java">SimplePlayer.java</a>:</dt>
+      <dd>
+	<p>
+	  A ScriptPlayer that employs a defensive Atropos strategy with only a two-move lookahead.  This player uses the same static evaluator as the Deep Player.  The only difference is the lookahead.
+	</p>
+      </dd>
+      <dt><a href="src/main/java/edu/bu/JustinPlayer.java">JustinPlayer.java</a>:</dt>
+      <dd>
+ 	<p>
+	  A ScriptPlayer that employs an aggressive Atropos strategy with a seven-move lookahead.  This player uses three evaluation techniques to drive the game into areas that will promote a losing situation.  The evaluator first counts the number of neighbors that are colored and adds value for each neighbor.  This makes the player choose areas of the board that have few spaces open which may lead to a losing situation.  The second evaluation is of the relationship between the neighbors.  Each neighbor is compaired to its immediate neighbor and value is added if they are different.  This pushes the player into areas with varying color which should lead to a faster losing condition.  The final evaluation of this player is the color difference between the neighbor and the current play.  If the neighbor is a different color from the color we are playing in a circle then value is added.  This makes the player choose areas where it does not lose, but is surrounded by varying colors.  These evaluations create a player that forces play into areas with varying color and few spaces.
+	</p>
+      </dd>
+      <dt><a href="src/main/java/edu/bu/HowellPlayer.java">HowellPlayer.java</a>:</dt>
+      <dd>
+	<p>
+	  A ScriptPlayer that employs a mixed Atropos strategy with a seven-move lookahead.  This player uses three evaluation techniques that are similar to the DefensivePlayer.  The first evaluator is the same as the DefensivePlayer in that it adds value for uncolored neighbors, but in this case the uncolored circles are weighted with a larger value to make them more appealing.  The second evaluator is similar to the JustinPlayer in that it adds value where the neighbors are different.  The difference is that more value is added for these circles, but only half as much as the uncolored circles.  The final evaluator is the opposite of the JustinPlayer in that it subtracts value where there are neighbors with a different color.  This hybrid approach attempts to create a more balanced player.
+	</p>
+      </dd>
+      <dt><a href="src/main/java/edu/bu/AtroposStateReader.java">AtroposStateReader.java</a>:</dt>
+      <dd>
+	<p>
+	  A mini <a href="http://en.wikipedia.org/wiki/Parser_combinator">parser combinator</a>-inspired library to read Atropos game states.  Parser combinators work by defining composable grammer components, like character literals, and generic methods for combining them to create complex and flexible parsers.  The implementation in this project defines combinators that correspond to simple sequences, choice and Kleene star.</p>
+      </dd>
+    </dl>
+<p><a href="src/main/java/edu/bu/AbhinayPlayer.java">AbhinayPlayer.java</a>
+</p>
+<dd>
+      <p>The strategy employed is described below.</p>
+      <pre class="abhinay-player">Static Evaluator
+       Scans for the number of playable circles adjacent to the circle colored by the last move.
+           If there are no playable circles, 
+          		it returns a decent score as it is hard for the competitor
+          		to setup a trap on an open board.
+   
+           If there exist playable circles,
+           for every circle A that can be filled by the competitor,
+          		it retrieves the colors of the six neighbors of A.
+          		for every neighbor of A,
+          			it computes the score of A by using
+           			a clockwise score evaluation.
+           it then reports the best possible score for the competitor amongst
+           those of all such circles A.
+   
+Clockwise score evaluation
+			initialize score to 0
+           retrieve all neighboring colors of A.
+           if any of the neighbors of A are colored green,
+           	change the value from 3 to 5	// Thus Red = 1, Blue = 2, Green = 5
+           for every two consecutive neighbors X and Y with different colors,
+           	initialize possible colors index k
+           	add the color values of X and Y 
+           	and subtract it from the sum of all colors // Sum of all colors = 8
+           	and set the value of the resulting 
+				color(third color) in the index k to 0 // This can be done any number of times. 
+           	indicating this color is disallowed.
+           for all remaining possible colors C for node A 
+           (specified int he index k)
+           subtract the value of color C from the score.</pre>
+        <pre class="abhinay-player"> return score
+
+
+<img src="Images/clockeval.jpg" width="226" height="198" alt="clockwise eval"></pre>
+        <pre class="abhinay-player">//From the above it is clear that the range of score is [0, -1, -2, -5, -3, -7, -8]
+//A score of 0 indicates that there are no possible colors left for the competitor.
+//Hence, making the current move for the current player a winning move.
+//A score lesser than 0 indicates the best possible move by the competitor.
+//This static evaluator has been designed with the assumption that limiting the
+//possibilities for the competitor and filling up the circles with most number of
+//possibilties at the same time leads to the success of the current player.
+//Script player using this evaluator against the random player 
+//on a board size of 7 won the game 9/10 times during the tests.</pre>
+</dd>
+<h2>Results</h2>
+<p>&nbsp;</p>
+<table width="899" height="328" border="1" align="center">
+  <tr>
+    <td>Player1 vs Player2</td>
+    <td>DeepPlayer</td>
+    <td>JustinPlayer&nbsp;&nbsp; </td>
+    <td>HowellPlayer </td>
+    <td>AbhinayPlayer </td>
+    <td>SimplePlayer </td>
+    <td>Default Player</td>
+    <td>Average Score</td>
+  </tr>
+  <tr>
+    <td>DeepPlayer</td>
+    <td>0.3</td>
+    <td>0.6</td>
+    <td>0.5</td>
+    <td>0.3</td>
+    <td>0.7</td>
+    <td>0.6</td>
+    <td>0.50</td>
+  </tr>
+  <tr>
+    <td> JustinPlayer&nbsp;&nbsp; </td>
+    <td>0.6</td>
+    <td>0.3</td>
+    <td>0.7</td>
+    <td>0.5</td>
+    <td>0.6</td>
+    <td>0.7</td>
+    <td>0.56</td>
+  </tr>
+  <tr>
+    <td> HowellPlayer </td>
+    <td>0.4</td>
+    <td>0.6</td>
+    <td>0.5</td>
+    <td>0.6</td>
+    <td>0.5</td>
+    <td>0.6</td>
+    <td>0.53</td>
+  </tr>
+  <tr>
+    <td> AbhinayPlayer </td>
+    <td>0.6</td>
+    <td>0.6</td>
+    <td>0.5</td>
+    <td>0.5</td>
+    <td>0.0</td>
+    <td>0.7</td>
+    <td>0.48</td>
+  </tr>
+  <tr>
+    <td> SimplePlayer </td>
+    <td>0.6</td>
+    <td>0.7</td>
+    <td>0.6</td>
+    <td>1</td>
+    <td>0.4</td>
+    <td>0.5</td>
+    <td>0.63</td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+<p>The above scores are generated by playing each of the players against themselves and the rest of the players. Each score is based on a ten round tournament between each &quot;player1&quot; (each row) and &quot;player 2&quot; (each column).</p>
+</body>
+</html>
+  
