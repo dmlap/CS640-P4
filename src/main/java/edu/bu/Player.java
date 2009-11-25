@@ -39,13 +39,20 @@ public class Player {
 		for (Iterator<AtroposCircle> circleIterator = currentstate.playableCircles(); circleIterator.hasNext(); ) {
 			AtroposCircle circle = (AtroposCircle) circleIterator.next();
 			
-			for(int i = 1; i < colors.length; i++){
+			for (int i = 1; i < colors.length; i++){
+                int alpha =  0;
+                int Mini  = -1;
 				AtroposCircle circlecopy = circle.clone();	
 				circlecopy.color(i); 							// color the circle
 				AtroposState nextState = currentstate.clone(); 	// copy the current state
 				nextState.makePlay(circlecopy); 				// make move on copy 
 				
-				int alpha = alphabeta(nextState, depth , Integer.MIN_VALUE, Integer.MAX_VALUE);
+				if (currentstate.lastPlay == null)              // check if the level is a 
+                    Mini = 0;                                   // maximizing level or a
+                else
+                    Mini = 1;                                   // minimizing level.
+                
+                alpha = alphabeta(nextState, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, Mini);
 				
 				if (alpha > bestAlpha) {
 					bestAlpha = alpha;
@@ -75,10 +82,10 @@ public class Player {
 	 * @return
 	 * 			The value of the proposed move
 	 */
-	private int alphabeta(AtroposState state, int depth, int alpha, int beta){
-		ArrayList<AtroposState> childStates = new ArrayList<AtroposState>();
+	private int alphabeta(AtroposState state, int depth, int alpha, int beta, int Mini){
+        ArrayList<AtroposState> childStates = new ArrayList<AtroposState>();
 		
-		// If we got a losing condition or the depth is reached, return
+        // If we got a losing condition or the depth is reached, return
 	    if(state.isFinished() || depth == 0)
 			return evaluator.evaluateMove(state);
 	    
@@ -96,14 +103,28 @@ public class Player {
 			}
 		}
 		
-		// loop through all child states and call alphabeta
-		for(AtroposState child : childStates) {	
-			alpha = Math.max(alpha, -alphabeta(child, depth-1, -beta, -alpha));
+		if (Mini == 0) {
+            // loop through all child states and call alphabeta
+		    for(AtroposState child : childStates) {	
+                alpha = Math.max(alpha, -alphabeta(child, depth-1, -beta, -alpha, Mini));
 			
-			if (beta <= alpha)
-				break;
-		}
+			    if (beta <= alpha)
+				    return alpha;
+		    }
 		
-		return alpha;
+		    return alpha;
+        }
+        else {
+            // loop through all child states and call alphabeta
+		    for(AtroposState child : childStates) {	
+			    beta = Math.max(alpha, -alphabeta(child, depth-1, -beta, -alpha, Mini));
+			
+			    if (alpha >= beta)
+				    return beta;
+		    }
+		
+		    return beta;
+        }
+
 	}
 }
